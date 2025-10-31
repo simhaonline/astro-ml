@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Download exact swisseph-2.10.3.2 source tarball (GitHub tag)
 RUN curl -L -o swisseph-2.10.3.2.tar.gz \
-    https://github.com/astrorigin/swisseph/archive/refs/tags/v2.10.3.2.tar.gz && \
+    https://github.com/aloistr/swisseph/archive/refs/tags/v2.10.03.tar.gz && \
     tar xzf swisseph-2.10.3.2.tar.gz && \
     cd swisseph-2.10.3.2 && \
     python setup.py bdist_wheel --dist-dir /wheels
