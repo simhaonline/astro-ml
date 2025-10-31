@@ -1,31 +1,27 @@
-# ----------------------------------------------------------
-# 1. Build stage – compile swisseph + Python wheels
-# ----------------------------------------------------------
+# ---- build stage ----
 FROM python:3.11-bullseye as builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    swig \
-    libssl-dev \
-    libffi-dev \
-    python3-dev \
-    curl \
+    build-essential swig libssl-dev libffi-dev python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Build all remaining wheels (numpy, fastapi, etc.)
-COPY requirements.txt /tmp/
-RUN pip wheel --no-cache-dir --wheel-dir /wheels -r /tmp/requirements.txt
+# install Python deps into /opt/venv
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# ----------------------------------------------------------
-# 2. Runtime stage – slim, no build tools
-# ----------------------------------------------------------
+# ---- runtime stage ----
 FROM python:3.11-slim-bullseye
+
+# copy the pre-built venv (contains uvicorn)
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /app
 COPY . .
 USER nobody
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
-  CMD python -c "import requests,sys;sys.exit(0 if requests.get('http://localhost:8888/health/live').ok else 1)"
-
-CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8888", "--workers", "4"]
+# use python -m so we never rely on PATH
+CMD ["python", "-m", "uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8888", "--workers", "4"]
