@@ -1,4 +1,3 @@
-swisseph==2.10.3.2   # last SWIG-3 friendly release
 numpy==1.26.4
 pandas==2.2.2
 fastapi==0.111.0
