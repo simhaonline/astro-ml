@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: astro-ml
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels: {app: astro-ml}
+  template:
+    metadata:
+      labels: {app: astro-ml}
+    spec:
+      containers:
+      - name: api
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports: [{containerPort: 8888}]
+        livenessProbe:
+          httpGet: {path: /health/live, port: 8888}
+          initialDelaySeconds: 10
+        readinessProbe:
+          httpGet: {path: /health/ready, port: 8888}
+          initialDelaySeconds: 5
+        env:
+        - name: S3_BUCKET
+          value: "{{ .Values.s3Bucket }}"
+        - name: REDIS_URL
+          value: "redis://redis:6379"
+        resources: {{- toYaml .Values.resources | nindent 10 }}
