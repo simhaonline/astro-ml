@@ -1,5 +1,5 @@
 # ----------------------------------------------------------
-# 1. Build stage (compile swisseph + Python wheels)
+# 1. Build stage – compile swisseph + Python wheels
 # ----------------------------------------------------------
 FROM python:3.11-bullseye as builder
 
@@ -12,27 +12,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Download exact swisseph-2.10.3.2 source tarball (GitHub tag)
+# Download the **exact** 2.10.3.2 source tarball (GitHub tag)
 RUN curl -L -o swisseph-2.10.3.2.tar.gz \
-    https://github.com/aloistr/swisseph/archive/refs/tags/v2.10.03.tar.gz && \
+    https://github.com/astrorigin/swisseph/archive/refs/tags/v2.10.3.2.tar.gz && \
     tar xzf swisseph-2.10.3.2.tar.gz && \
     cd swisseph-2.10.3.2 && \
     python setup.py bdist_wheel --dist-dir /wheels
 
-# Build all other wheels (numpy, fastapi, etc.)
+# Build all remaining wheels (numpy, fastapi, etc.)
 COPY requirements.txt /tmp/
 RUN pip wheel --no-cache-dir --wheel-dir /wheels -r /tmp/requirements.txt
 
 
 # ----------------------------------------------------------
-# 2. Runtime stage (slim, no build tools)
+# 2. Runtime stage – slim, no build tools
 # ----------------------------------------------------------
 FROM python:3.11-slim-bullseye
 
 # copy pre-built wheels only
 COPY --from=builder /wheels /wheels
 
-# install everything *without* building
+# install everything **without** building
 RUN pip install --no-cache-dir --find-links /wheels \
     swisseph==2.10.3.2 \
     -r /tmp/requirements.txt && \
