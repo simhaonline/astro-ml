@@ -5,7 +5,4 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "astro-ml"
 version = "1.0.0"
-dependencies = []   # all in requirements.txt
-
-[project.scripts]
-astro-train = "scripts.train:main"
+dependencies = []   # everything already in requirements.txt
