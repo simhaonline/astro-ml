@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: astro-ml-training
+spec:
+  schedule: "{{ .Values.cronjobs.training.schedule }}"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: train
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            command: {{ .Values.cronjobs.training.command }}
+            env:
+            - name: S3_BUCKET
+              value: "{{ .Values.s3Bucket }}"
+            resources:
+              limits: { nvidia.com/gpu: "1" }
