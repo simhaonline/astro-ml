@@ -13,8 +13,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # 2. Python deps (kept in requirements.txt)
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt swisseph-2.10.3.2.tar.gz ./
+RUN pip install --no-cache-dir swisseph-2.10.3.2.tar.gz && \
+    pip install --no-cache-dir -r requirements.txt
 
 # 3. App code
 COPY . .
